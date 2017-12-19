@@ -8,18 +8,26 @@ import multiprocessing
 import logging
 import sys
 import traceback
+import json
 
+import arkInit
+arkInit.init()
+arkRoot = arkInit.arkRoot
 
 # setup environment
 try:
-    import config
+    with open(arkRoot + 'arkFTrack/config/ftrack_event_server.json') as f:
+        contents = f.read()
 
-    os.environ['FTRACK_SERVER'] = config.server_url
-    os.environ['FTRACK_API_USER'] = config.user
-    os.environ['LOGNAME'] = config.user
-    os.environ['FTRACK_API_KEY'] = config.api_key
+    config = json.loads(contents)
+
+    os.environ['FTRACK_SERVER'] = config['server_url']
+    os.environ['FTRACK_API_USER'] = config['user']
+    os.environ['LOGNAME'] = 'ftrack-event-server.log'
+    os.environ['FTRACK_API_KEY'] = config['api_key']
+
 except:
-    print traceback.format_exc
+    print traceback.format_exc()
 
 
 class StreamToLogger(object):
@@ -37,6 +45,7 @@ class StreamToLogger(object):
 
 
 logging.basicConfig(
+    filename=os.environ['LOGNAME'],
     level=logging.INFO,
     format='%(asctime)s - %(name)s:\n%(message)s')
 
@@ -54,13 +63,14 @@ class JobProcess(multiprocessing.Process):
         sys.path.append(os.path.dirname(self.path))
 
         try:
+            thread_logger.info(self.path)
             execfile(self.path, {'__file__': self.path})
         except:
             print traceback.format_exc()
 
 
 def main():
-
+    print 'starting server'
     # getting plugins
     args = sys.argv[1:]
     paths = []
@@ -82,6 +92,7 @@ def main():
 
     # starting event plugins
     for path in paths:
+        print 'starting job', path
         t = JobProcess(path, path)
         t.start()
 
