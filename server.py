@@ -25,6 +25,7 @@ try:
     os.environ['FTRACK_API_USER'] = config['user']
     os.environ['LOGNAME'] = 'ftrack-event-server.log'
     os.environ['FTRACK_API_KEY'] = config['api_key']
+
 except:
     print traceback.format_exc()
 
