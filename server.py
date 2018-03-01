@@ -23,7 +23,7 @@ try:
 
     os.environ['FTRACK_SERVER'] = config['server_url']
     os.environ['FTRACK_API_USER'] = config['user']
-    os.environ['LOGNAME'] = 'ftrack-event-server.log'
+    os.environ['LOGNAME'] = config['user']
     os.environ['FTRACK_API_KEY'] = config['api_key']
 
 except:
@@ -45,9 +45,10 @@ class StreamToLogger(object):
 
 
 logging.basicConfig(
-    filename=os.environ['LOGNAME'],
+    filename='ftrack-event-server.log',
     level=logging.INFO,
-    format='%(asctime)s - %(name)s:\n%(message)s')
+    filemode='w',
+    format='%(filename)s:%(funcName)s: %(message)s')
 
 
 class JobProcess(multiprocessing.Process):
